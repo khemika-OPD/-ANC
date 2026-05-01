@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANC Calculator - โดย เขมิกา พงษ์ศรี</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #00d2ff;
+            --bg-color: #f0f8ff;
+        }
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            max-width: 400px;
+            width: 90%;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 2px solid #fff;
+        }
+        /* ส่วนหัวสีสันสดใส */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 { margin: 0; font-size: 24px; }
+        .header p { margin: 5px 0 0; opacity: 0.9; font-size: 14px; }
+
+        .content { padding: 25px; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+        input:focus { border-color: var(--primary-color); outline: none; }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(to right, #00c6ff, #0072ff);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,114,255,0.3); }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        /* ส่วนท้าย */
+        .footer {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: center;
+            font-size: 13px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+        .dev-name { color: var(--primary-color); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>ANC Calculator</h1>
+        <p>เครื่องคำนวณหาค่าเม็ดเลือดขาวชนิด Neutrophil</p>
+    </div>
+
+    <div class="content">
+        <div class="input-group">
+            <label>WBC (cells/mm³)</label>
+            <input type="number" id="wbc" placeholder="ระบุค่า WBC เช่น 3500">
+        </div>
+        <div class="input-group">
+            <label>Neutrophil (%)</label>
+            <input type="number" id="neut" placeholder="ระบุ % เช่น 45">
+        </div>
+        <div class="input-group">
+            <label>Band (%)</label>
+            <input type="number" id="band" value="0">
+        </div>
+        <button onclick="calculateANC()">คำนวณผล</button>
+
+        <div id="result">
+            <div id="anc-value" style="font-size: 24px; font-weight: bold;"></div>
+            <div id="anc-status" style="margin-top: 5px;"></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        พัฒนาโดย <span class="dev-name">เขมิกา พงษ์ศรี</span><br>
+        เพื่อสนับสนุนการทำงานของบุคลากรทางการแพทย์
+    </div>
+</div>
+
+<script>
+function calculateANC() {
+    const wbc = parseFloat(document.getElementById('wbc').value);
+    const neut = parseFloat(document.getElementById('neut').value) || 0;
+    const band = parseFloat(document.getElementById('band').value) || 0;
+    const resDiv = document.getElementById('result');
+    const valDiv = document.getElementById('anc-value');
+    const statusDiv = document.getElementById('anc-status');
+
+    if (isNaN(wbc) || wbc <= 0) {
+        alert("กรุณากรอกค่า WBC ให้ถูกต้อง");
+        return;
+    }
+
+    const anc = Math.round(wbc * ((neut + band) / 100));
+    
+    let color = "";
+    let status = "";
+    let bgColor = "";
+
+    if (anc < 500) {
+        status = "Severe Neutropenia (วิกฤต)";
+        color = "#721c24";
+        bgColor = "#f8d7da";
+    } else if (anc < 1000) {
+        status = "Moderate Neutropenia (ปานกลาง)";
+        color = "#856404";
+        bgColor = "#fff3cd";
+    } else if (anc < 1500) {
+        status = "Mild Neutropenia (เล็กน้อย)";
+        color = "#0c5460";
+        bgColor = "#d1ecf1";
+    } else {
+        status = "ปกติ";
+        color = "#155724";
+        bgColor = "#d4edda";
+    }
+
+    resDiv.style.display = "block";
+    resDiv.style.backgroundColor = bgColor;
+    valDiv.style.color = color;
+    valDiv.innerText = "ANC = " + anc.toLocaleString();
+    statusDiv.style.color = color;
+    statusDiv.innerText = status;
+}
+</script>
+
+</body>
+</html>
