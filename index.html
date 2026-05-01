@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ANC Calculator - โดย เขมิกา พงษ์ศรี</title>
+    <!-- เรียกใช้ไลบรารีสร้าง QR Code -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
             --primary-color: #007bff;
@@ -18,73 +20,93 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            padding: 20px 0;
         }
         .container {
             background: white;
-            max-width: 400px;
+            max-width: 420px;
             width: 90%;
-            border-radius: 20px;
+            border-radius: 25px;
             overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            border: 2px solid #fff;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
         }
-        /* ส่วนหัวสีสันสดใส */
         .header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 30px 20px;
+            padding: 35px 20px;
             text-align: center;
         }
-        .header h1 { margin: 0; font-size: 24px; }
-        .header p { margin: 5px 0 0; opacity: 0.9; font-size: 14px; }
+        .header h1 { margin: 0; font-size: 26px; letter-spacing: 1px; }
+        .header p { margin: 8px 0 0; opacity: 0.9; font-size: 14px; }
 
-        .content { padding: 25px; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+        .content { padding: 30px; }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #444; }
         input {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e1e8ed;
-            border-radius: 10px;
+            padding: 14px;
+            border: 2px solid #edf2f7;
+            border-radius: 12px;
             box-sizing: border-box;
             font-size: 16px;
+            background-color: #f8fafc;
             transition: 0.3s;
         }
-        input:focus { border-color: var(--primary-color); outline: none; }
+        input:focus { border-color: #764ba2; outline: none; background-color: white; }
 
         button {
             width: 100%;
-            padding: 15px;
-            background: linear-gradient(to right, #00c6ff, #0072ff);
+            padding: 16px;
+            background: linear-gradient(to right, #667eea, #764ba2);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
             transition: 0.3s;
-            margin-top: 10px;
         }
-        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,114,255,0.3); }
+        button:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(118, 75, 162, 0.3); }
 
         #result {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 10px;
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 15px;
             text-align: center;
             display: none;
+            border: 1px solid rgba(0,0,0,0.05);
         }
 
-        /* ส่วนท้าย */
-        .footer {
-            background: #f8f9fa;
-            padding: 15px;
+        /* ส่วน QR Code */
+        .qr-section {
             text-align: center;
-            font-size: 13px;
-            color: #666;
-            border-top: 1px solid #eee;
+            padding: 20px;
+            border-top: 1px dashed #ddd;
         }
-        .dev-name { color: var(--primary-color); font-weight: bold; }
+        #qrcode {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        .btn-qr {
+            background: #e2e8f0;
+            color: #4a5568;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .footer {
+            background: #f8fafc;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #64748b;
+        }
+        .dev-name { color: #764ba2; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -92,17 +114,17 @@
 <div class="container">
     <div class="header">
         <h1>ANC Calculator</h1>
-        <p>เครื่องคำนวณหาค่าเม็ดเลือดขาวชนิด Neutrophil</p>
+        <p>Absolute Neutrophil Count</p>
     </div>
 
     <div class="content">
         <div class="input-group">
             <label>WBC (cells/mm³)</label>
-            <input type="number" id="wbc" placeholder="ระบุค่า WBC เช่น 3500">
+            <input type="number" id="wbc" placeholder="ตัวอย่าง: 5000">
         </div>
         <div class="input-group">
             <label>Neutrophil (%)</label>
-            <input type="number" id="neut" placeholder="ระบุ % เช่น 45">
+            <input type="number" id="neut" placeholder="ตัวอย่าง: 60">
         </div>
         <div class="input-group">
             <label>Band (%)</label>
@@ -111,62 +133,87 @@
         <button onclick="calculateANC()">คำนวณผล</button>
 
         <div id="result">
-            <div id="anc-value" style="font-size: 24px; font-weight: bold;"></div>
-            <div id="anc-status" style="margin-top: 5px;"></div>
+            <div id="anc-value" style="font-size: 28px; font-weight: bold;"></div>
+            <div id="anc-status" style="margin-top: 5px; font-weight: bold;"></div>
+        </div>
+    </div>
+
+    <!-- ปุ่มซ่อน/แสดง QR Code -->
+    <div class="qr-section">
+        <button class="btn-qr" onclick="toggleQR()">แสดง/ซ่อน QR สำหรับแชร์</button>
+        <div id="qr-container" style="display:none;">
+            <div id="qrcode"></div>
+            <p style="font-size: 11px; color: #999; margin-top: 10px;">สแกนเพื่อเปิดเครื่องมือนี้บนมือถือเครื่องอื่น</p>
         </div>
     </div>
 
     <div class="footer">
-        พัฒนาโดย <span class="dev-name">เขมิกา พงษ์ศรี</span><br>
-        เพื่อสนับสนุนการทำงานของบุคลากรทางการแพทย์
+        พัฒนาโดย <span class="dev-name">Khemika-OPD Takhli</span><br>
+        โรงพยาบาลตาคลี
     </div>
 </div>
 
 <script>
-function calculateANC() {
-    const wbc = parseFloat(document.getElementById('wbc').value);
-    const neut = parseFloat(document.getElementById('neut').value) || 0;
-    const band = parseFloat(document.getElementById('band').value) || 0;
-    const resDiv = document.getElementById('result');
-    const valDiv = document.getElementById('anc-value');
-    const statusDiv = document.getElementById('anc-status');
+    // สร้าง QR Code อัตโนมัติจาก URL ปัจจุบัน
+    var qrcode = new QRCode(document.getElementById("qrcode"), {
+        text: window.location.href,
+        width: 128,
+        height: 128
+    });
 
-    if (isNaN(wbc) || wbc <= 0) {
-        alert("กรุณากรอกค่า WBC ให้ถูกต้อง");
-        return;
+    function toggleQR() {
+        var x = document.getElementById("qr-container");
+        if (x.style.display === "none") {
+            x.style.display = "block";
+        } else {
+            x.style.display = "none";
+        }
     }
 
-    const anc = Math.round(wbc * ((neut + band) / 100));
-    
-    let color = "";
-    let status = "";
-    let bgColor = "";
+    function calculateANC() {
+        const wbc = parseFloat(document.getElementById('wbc').value);
+        const neut = parseFloat(document.getElementById('neut').value) || 0;
+        const band = parseFloat(document.getElementById('band').value) || 0;
+        const resDiv = document.getElementById('result');
+        const valDiv = document.getElementById('anc-value');
+        const statusDiv = document.getElementById('anc-status');
 
-    if (anc < 500) {
-        status = "Severe Neutropenia (วิกฤต)";
-        color = "#721c24";
-        bgColor = "#f8d7da";
-    } else if (anc < 1000) {
-        status = "Moderate Neutropenia (ปานกลาง)";
-        color = "#856404";
-        bgColor = "#fff3cd";
-    } else if (anc < 1500) {
-        status = "Mild Neutropenia (เล็กน้อย)";
-        color = "#0c5460";
-        bgColor = "#d1ecf1";
-    } else {
-        status = "ปกติ";
-        color = "#155724";
-        bgColor = "#d4edda";
+        if (isNaN(wbc) || wbc <= 0) {
+            alert("กรุณากรอกค่า WBC ให้ถูกต้อง");
+            return;
+        }
+
+        const anc = Math.round(wbc * ((neut + band) / 100));
+        
+        let color = "";
+        let status = "";
+        let bgColor = "";
+
+        if (anc < 500) {
+            status = "Severe Neutropenia (เสี่ยงติดเชื้อรุนแรง)";
+            color = "#b91c1c";
+            bgColor = "#fee2e2";
+        } else if (anc < 1000) {
+            status = "Moderate Neutropenia";
+            color = "#92400e";
+            bgColor = "#fef3c7";
+        } else if (anc < 1500) {
+            status = "Mild Neutropenia";
+            color = "#1e40af";
+            bgColor = "#dbeafe";
+        } else {
+            status = "ANC ปกติ";
+            color = "#065f46";
+            bgColor = "#d1fae5";
+        }
+
+        resDiv.style.display = "block";
+        resDiv.style.backgroundColor = bgColor;
+        valDiv.style.color = color;
+        valDiv.innerText = "ANC = " + anc.toLocaleString();
+        statusDiv.style.color = color;
+        statusDiv.innerText = status;
     }
-
-    resDiv.style.display = "block";
-    resDiv.style.backgroundColor = bgColor;
-    valDiv.style.color = color;
-    valDiv.innerText = "ANC = " + anc.toLocaleString();
-    statusDiv.style.color = color;
-    statusDiv.innerText = status;
-}
 </script>
 
 </body>
